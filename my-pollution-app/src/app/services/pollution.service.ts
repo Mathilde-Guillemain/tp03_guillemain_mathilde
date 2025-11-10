@@ -1,41 +1,60 @@
-  import { Injectable } from '@angular/core';
-  import { HttpClient } from '@angular/common/http';
-  import { Observable } from 'rxjs';
-  import { environment } from '../../environments/environment';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
-  export interface Pollution {
-    id?: number;
-    titre: string;
-    type: string;
-    description: string;
-    dateObservation: string;
-    lieu: string;
-    latitude: number;
-    longitude: number;
-    photoUrl?: string;
+import { BehaviorSubject, map, Observable } from 'rxjs';
+import { Pollution } from '../models/pollution.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PollutionService {
+  private pollutions$ = new BehaviorSubject<Pollution[]>([]);
+
+  constructor(private http: HttpClient) {
+    this.loadInitialData();
   }
 
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class PollutionService {
-    private apiUrl = environment.apiUrl;
+  private loadInitialData(): void {
+  this.http.get<{ pollutions: Pollution[] }>('assets/pollutions.json')
+    .subscribe(data => {
+      this.pollutions$.next(data.pollutions);
+    });
+}
 
-    constructor(private http: HttpClient) {}
 
-    getPollutions(): Observable<Pollution[]> {
-      return this.http.get<Pollution[]>(this.apiUrl);
-    }
+  public getPollutions(): Observable<Pollution[]> {
+    return this.pollutions$.asObservable();
+  }
 
-    addPollution(pollution: Pollution): Observable<Pollution> {
-      return this.http.post<Pollution>(this.apiUrl, pollution);
-    }
+  public addPollution(pollution: Pollution): void {
+    const currentPollutions = this.pollutions$.getValue();
+    pollution.id = currentPollutions.length + 1;
+    this.pollutions$.next([...currentPollutions, pollution]);
+  }
 
-    updatePollution(pollution: Pollution): Observable<Pollution> {
-      return this.http.put<Pollution>(`${this.apiUrl}/${pollution.id}`, pollution);
-    }
+  public getOne(id: number): Observable<Pollution> {
+    return this.pollutions$.pipe(
+      map(list => list.find(p => p.id === id) as Pollution)
+    );
+  }
 
-    deletePollution(id?: number): Observable<void> {
-      return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  public updatePollution(id: number, updated: Pollution): void {
+    const pollutions = this.pollutions$.getValue();
+    const index = pollutions.findIndex(p => p.id === id);
+
+    if (index !== -1) {
+      pollutions[index] = { ...updated, id };
+      this.pollutions$.next([...pollutions]);
     }
   }
+
+  public deletePollution(id: number): void {
+    const pollutions = this.pollutions$.getValue();
+    const newList = pollutions.filter(p => p.id !== id);
+    this.pollutions$.next(newList);
+  }
+
+
+}
+
+

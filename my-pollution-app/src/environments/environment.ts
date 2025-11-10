@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'api/pollutions' 
+  apiUrl: 'assets/pollutions.json' // chemin vers ton fichier JSON
 };

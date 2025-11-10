@@ -1,7 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { PollutionService, Pollution } from '../services/pollution.service';
+import { PollutionService} from '../services/pollution.service';
+import { Pollution } from '../models/pollution.model';
+
 
 @Component({
   selector: 'app-pollution-form',
@@ -39,23 +41,21 @@ export class PollutionFormComponent {
   }
 
   onSubmit() {
-    if (this.pollutionForm.invalid) return;
+  if (this.pollutionForm.invalid) return;
 
-    const value = this.pollutionForm.value as Pollution;
+  const value = this.pollutionForm.value as Pollution;
 
-    if (value.id) {
-      this.pollutionService.updatePollution(value).subscribe(() => {
-        this.pollutionForm.reset();
-        this.formSubmitted.emit();
-      });
-    } else {
-      const { id, ...payload } = value;
-      this.pollutionService.addPollution(payload).subscribe(() => {
-        this.pollutionForm.reset();
-        this.formSubmitted.emit();
-      });
-    }
+  if (value.id) {
+    this.pollutionService.updatePollution(value.id!, value);
+  } else {
+    const { id, ...payload } = value;
+    this.pollutionService.addPollution(payload);
   }
+
+  this.pollutionForm.reset();
+  this.formSubmitted.emit();
+}
+
 
   cancel() {
     this.pollutionForm.reset();

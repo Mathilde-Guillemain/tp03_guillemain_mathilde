@@ -1,4 +1,4 @@
-import { InMemoryDbService } from 'angular-in-memory-web-api';
+/*import { InMemoryDbService } from 'angular-in-memory-web-api';
 import { Injectable } from '@angular/core';
 import { Pollution } from './services/pollution.service';
 
@@ -44,4 +44,4 @@ export class InMemoryDataService implements InMemoryDbService {
     : 1;
 }
 
-}
+}*/

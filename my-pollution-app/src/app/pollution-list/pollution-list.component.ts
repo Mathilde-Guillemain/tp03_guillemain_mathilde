@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PollutionService, Pollution } from '../services/pollution.service';
+import { PollutionService} from '../services/pollution.service';
+import { Pollution } from '../models/pollution.model';
 import { PollutionFormComponent } from '../pollution-form/pollution-form.component';
 import { PollutionRecapComponent } from '../pollution-recap/pollution-recap.component';
 import { Observable } from 'rxjs';
+
 
 @Component({
   selector: 'app-pollution-list',
@@ -36,12 +38,14 @@ export class PollutionListComponent implements OnInit {
   this.selectedPollution = null;
   }
 
+
   delete(p: Pollution) {
-  this.pollutionService.deletePollution(p.id).subscribe(() => {
+    if (!p.id) return;
+    this.pollutionService.deletePollution(p.id);
     this.refreshList();
     this.selectedPollution = null;
-  });
   }
+
 
   refreshList() {
     this.pollutions$ = this.pollutionService.getPollutions();
